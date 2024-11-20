@@ -1,0 +1,78 @@
+type User {
+    email: String!
+    firstName: String!
+    middleName: String
+    lastName: String!
+}
+
+type Project {
+    id: ID!
+    title: String!
+    description: String!
+    creatorEmail: String!
+    dateCreated: String!
+}
+
+type ProjectMember {
+    email: String!
+    firstName: String!
+    middleName: String
+    lastName: String!
+    isCreator: Boolean!
+    isOwner: Boolean!
+}
+
+type ProjectPage {
+    projectId: ID!
+    projectTitle: String!
+    projectDescription: String!
+    projectCreateDate: String!
+    projectCreator: User!
+    projectMembersList: [ProjectMember!]!
+    projectGroupList: [Group!]!
+}
+
+type Group {
+    id: ID!
+    name: String!
+}
+
+enum BacklogState {
+    NOT_STARTED
+    IN_PROGRESS
+    BLOCKED
+    COMPLETED
+}
+
+type GroupEntityDto {
+    id: ID!
+    name: String!
+}
+
+type BacklogEntityDto {
+    id: ID!
+    name: String!
+    description: String!
+    effort: Int!
+    creator: ProjectMember!
+    dateCreated: String!
+    dateCompleted: String
+    isModifiable: Boolean!
+    state: BacklogState!
+    assigner: ProjectMember
+    assignee: ProjectMember
+    group: GroupEntityDto
+    sprint: SprintEntityDto
+}
+
+type SprintEntityDto {
+    id: ID!
+    name: String!
+    startDate: String!
+    endDate: String!
+    isOpen: Boolean!
+    isDue: Boolean!
+    group: GroupEntityDto
+    backlogs: [BacklogEntityDto]
+}
+

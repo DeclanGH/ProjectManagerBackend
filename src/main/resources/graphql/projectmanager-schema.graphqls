@@ -1,0 +1,47 @@
+# read and return
+type Query {
+    # user
+    getUserByEmail(email: String!): User!
+
+    # project
+    getUserProjects(userEmail: String!): [Project!]!
+    getProjectPage(projectId: ID!, userEmail: String!): ProjectPage!
+    getProjectInviteLinkPath(projectId: ID!, userEmail: String!): String!
+
+    # group
+    getGroupMembers(userEmail: String!, projectId: ID!, groupId: ID!): [ProjectMember!]!
+
+    # backlog
+    getGroupBacklog(userEmail: String!, projectId: ID!, groupId: ID!, backlogId: ID!): BacklogEntityDto!
+    getGroupBacklogs(userEmail: String!, projectId: ID!, groupId: ID!): [BacklogEntityDto!]!
+
+    # sprint
+    getGroupSprint(userEmail: String!, projectId: ID!, groupId: ID!, sprintId: ID!): SprintEntityDto!
+    getGroupSprints(userEmail: String!, projectId: ID!, groupId: ID!): [SprintEntityDto!]!
+}
+
+# modify
+type Mutation {
+    # create
+    createOrUpdateUser(email: String!, firstName: String!, middleName: String, lastName: String!): User
+    createProject(email: String!, title: String!, description: String!, duration: Int!): Project
+    createGroup(email: String!, name: String!, projectId: ID!): Group
+    createBacklog(userEmail: String!, projectId: ID!, groupId: ID!, backlogName: String!, backlogDescription: String!, backlogEffort: Int!): BacklogEntityDto
+    createSprint(userEmail: String!, projectId: ID!, groupId: ID!, sprintName: String!, startDate: String!, endDate: String!): SprintEntityDto!
+
+    # update
+    addMemberToProjectUsingInvite(userEmail: String!, projectId: ID!, token: String!): Project
+    removeMemberFromProject(projectId: ID!, deleterEmail: String!, memberToDeleteEmail: String!): Boolean
+    updateBacklog(userEmail: String!, projectId: ID!, groupId: ID!, backlogId: ID!, assigneeEmail: String, sprintId: ID, backlogState: BacklogState): BacklogEntityDto
+    updateBacklogState(userEmail: String!,projectId: ID!, groupId: ID!, sprintId: ID!, backlogId: ID!, backlogState: BacklogState!): SprintEntityDto!
+
+    # delete
+    deleteUser(email: String!): Boolean
+    deleteProject(projectId: ID!, email: String!): Boolean
+    deleteGroup(email: String!, groupId: ID!, projectId: ID!): Boolean
+}
+
+# publish updates
+type Subscription {
+    backlogStateChangedInSprint: SprintEntityDto
+}
