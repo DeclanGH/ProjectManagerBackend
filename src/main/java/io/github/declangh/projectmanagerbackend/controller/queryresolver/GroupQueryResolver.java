@@ -1,5 +1,7 @@
 package io.github.declangh.projectmanagerbackend.controller.queryresolver;
 
+import io.github.declangh.projectmanagerbackend.model.dto.BacklogEntityDto;
+import io.github.declangh.projectmanagerbackend.model.dto.BurndownChartDataDto;
 import io.github.declangh.projectmanagerbackend.model.dto.ProjectMember;
 import io.github.declangh.projectmanagerbackend.service.GroupService;
 import lombok.NonNull;
@@ -23,5 +25,19 @@ public class GroupQueryResolver {
                                                @Argument @NonNull final Long projectId,
                                                @Argument @NonNull final Long groupId) {
         return groupService.getGroupMembers(userEmail, projectId, groupId);
+    }
+
+    @QueryMapping
+    public BurndownChartDataDto getGroupBurndownChartData(@Argument @NonNull final String userEmail,
+                                                          @Argument @NonNull final Long projectId,
+                                                          @Argument @NonNull final Long groupId) {
+        return groupService.getGroupBurndownChartData(userEmail, projectId, groupId);
+    }
+
+    @QueryMapping
+    public List<BacklogEntityDto> getNotCompletedAssignedBacklogs(@Argument @NonNull final String userEmail,
+                                                                  @Argument @NonNull final Long projectId,
+                                                                  @Argument @NonNull final Long groupId) {
+        return groupService.getNotCompletedAssignedBacklogs(userEmail, projectId, groupId);
     }
 }

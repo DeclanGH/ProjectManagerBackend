@@ -4,6 +4,7 @@ import io.github.declangh.projectmanagerbackend.model.dto.BacklogEntityDto;
 import io.github.declangh.projectmanagerbackend.model.dto.ProjectMember;
 import io.github.declangh.projectmanagerbackend.model.dto.SprintEntityDto;
 import io.github.declangh.projectmanagerbackend.model.entity.Backlog;
+import io.github.declangh.projectmanagerbackend.model.entity.Group;
 import io.github.declangh.projectmanagerbackend.model.entity.Project;
 import io.github.declangh.projectmanagerbackend.model.entity.Sprint;
 import io.github.declangh.projectmanagerbackend.model.entity.User;
@@ -22,10 +23,13 @@ public class DtoBuilder {
      * @param member {@link User}
      * @return {@link ProjectMember} is both parameters are provided, and null if {@code member} is null
      */
-    public static ProjectMember buildProjectMember(@NonNull final Project project, final User member) {
+    public static ProjectMember buildProjectMember(@NonNull final Project project, final User member, final Group group) {
         if (member == null) {
             return null;
         }
+
+        Boolean isGroupCreator = (group == null) ? null : group.getCreatorEmail().equals(member.getEmail());
+        Boolean isGroupMember = (group == null) ? null : group.getMembers().contains(member);
 
         return ProjectMember.builder()
                 .email(member.getEmail())
@@ -34,6 +38,9 @@ public class DtoBuilder {
                 .lastName(member.getLastName())
                 .isOwner(project.getOwners().contains(member))
                 .isCreator(project.getCreatorEmail().equals(member.getEmail()))
+                // I know the two lines below is a bit hacky, but I intend on creating a GroupMemberDto in future TODO:...
+                .isGroupCreator(isGroupCreator)
+                .isGroupMember(isGroupMember)
                 .build();
     }
 
@@ -45,30 +52,32 @@ public class DtoBuilder {
      * @return {@link BacklogEntityDto}
      */
     public static BacklogEntityDto buildBacklogEntityDto(@NonNull final Backlog backlog,
-                                                         @NonNull final Project project) {
+                                                         @NonNull final Project project,
+                                                         final Group group) {
         return BacklogEntityDto.builder()
                 .id(backlog.getId())
                 .name(backlog.getName())
                 .description(backlog.getDescription())
                 .effort(backlog.getEffort())
-                .creator(buildProjectMember(project, backlog.getCreator()))
+                .creator(buildProjectMember(project, backlog.getCreator(), group))
                 .dateCreated(backlog.getDateCreated())
                 .dateCompleted(backlog.getDateCompleted())
                 .isModifiable(backlog.getIsModifiable())
                 .state(backlog.getState())
-                .assigner(buildProjectMember(project, backlog.getAssigner()))
-                .assignee(buildProjectMember(project, backlog.getAssignee()))
+                .assigner(buildProjectMember(project, backlog.getAssigner(), group))
+                .assignee(buildProjectMember(project, backlog.getAssignee(), group))
                 .group(null) // maybe in the future when backlog can be viewed at project level, this can be relevant
                 .sprint(buildSprintEntityDtoWithoutBacklogList(backlog.getSprint()))
                 .build();
     }
 
     public static SprintEntityDto buildSprintEntityDto(@NonNull final Sprint sprint,
-                                                       @NonNull final Project project) {
+                                                       @NonNull final Project project,
+                                                       @NonNull final Group group) {
         Set<Backlog> backlogs = sprint.getBacklogs();
         List<BacklogEntityDto> backlogEntityDtosWithoutSprint = new ArrayList<>();
         for (Backlog backlog : backlogs) {
-            backlogEntityDtosWithoutSprint.add(buildBacklogEntityDtoWithoutSprint(backlog, project));
+            backlogEntityDtosWithoutSprint.add(buildBacklogEntityDtoWithoutSprint(backlog, project, group));
         }
 
         return SprintEntityDto.builder()
@@ -100,19 +109,20 @@ public class DtoBuilder {
     }
 
     private static BacklogEntityDto buildBacklogEntityDtoWithoutSprint(@NonNull final Backlog backlog,
-                                                                      @NonNull final Project project) {
+                                                                       @NonNull final Project project,
+                                                                       @NonNull final Group group) {
         return BacklogEntityDto.builder()
                 .id(backlog.getId())
                 .name(backlog.getName())
                 .description(backlog.getDescription())
                 .effort(backlog.getEffort())
-                .creator(buildProjectMember(project, backlog.getCreator()))
+                .creator(buildProjectMember(project, backlog.getCreator(), group))
                 .dateCreated(backlog.getDateCreated())
                 .dateCompleted(backlog.getDateCompleted())
                 .isModifiable(backlog.getIsModifiable())
                 .state(backlog.getState())
-                .assigner(buildProjectMember(project, backlog.getAssigner()))
-                .assignee(buildProjectMember(project, backlog.getAssignee()))
+                .assigner(buildProjectMember(project, backlog.getAssigner(), group))
+                .assignee(buildProjectMember(project, backlog.getAssignee(), group))
                 .group(null)
                 .sprint(null)
                 .build();

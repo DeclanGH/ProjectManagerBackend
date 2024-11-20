@@ -1,5 +1,6 @@
 package io.github.declangh.projectmanagerbackend.controller.queryresolver;
 
+import io.github.declangh.projectmanagerbackend.model.dto.BurndownChartDataDto;
 import io.github.declangh.projectmanagerbackend.model.dto.ProjectPage;
 import io.github.declangh.projectmanagerbackend.model.entity.Project;
 import io.github.declangh.projectmanagerbackend.service.ProjectService;
@@ -34,5 +35,11 @@ public class ProjectQueryResolver {
     public String getProjectInviteLinkPath(@Argument @NonNull final Long projectId,
                                            @Argument @NonNull final String userEmail) {
         return projectService.generateInviteLinkPath(projectId, userEmail);
+    }
+
+    @QueryMapping
+    public BurndownChartDataDto getProjectBurndownChartData(@Argument @NonNull final String userEmail,
+                                                            @Argument @NonNull final Long projectId) {
+        return projectService.getProjectBurndownChartData(userEmail, projectId);
     }
 }

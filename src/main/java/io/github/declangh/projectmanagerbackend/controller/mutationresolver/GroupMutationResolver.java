@@ -1,5 +1,6 @@
 package io.github.declangh.projectmanagerbackend.controller.mutationresolver;
 
+import io.github.declangh.projectmanagerbackend.model.dto.ProjectMember;
 import io.github.declangh.projectmanagerbackend.model.entity.Group;
 import io.github.declangh.projectmanagerbackend.service.GroupService;
 import lombok.NonNull;
@@ -30,5 +31,12 @@ public class GroupMutationResolver {
         return groupService.deleteGroup(email, groupId, projectId);
     }
 
-    // methods
+    @MutationMapping
+    public ProjectMember addMemberToGroup(@Argument @NonNull final String userEmail,
+                                          @Argument @NonNull final Long projectId,
+                                          @Argument @NonNull final Long groupId,
+                                          @Argument @NonNull final String newGroupMember) {
+        return groupService.addMemberToGroup(userEmail, projectId, groupId, newGroupMember);
+    }
+
 }

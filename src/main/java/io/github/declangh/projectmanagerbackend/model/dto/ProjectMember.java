@@ -20,4 +20,8 @@ public class ProjectMember {
     @NonNull private final Boolean isCreator;
 
     @NonNull private final Boolean isOwner;
+
+    private final Boolean isGroupCreator;
+
+    private final Boolean isGroupMember;
 }

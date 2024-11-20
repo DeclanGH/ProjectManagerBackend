@@ -1,7 +1,6 @@
 package io.github.declangh.projectmanagerbackend.controller.queryresolver;
 
 import io.github.declangh.projectmanagerbackend.model.dto.SprintEntityDto;
-import io.github.declangh.projectmanagerbackend.model.entity.Sprint;
 import io.github.declangh.projectmanagerbackend.service.SprintService;
 import lombok.NonNull;
 import org.springframework.graphql.data.method.annotation.Argument;

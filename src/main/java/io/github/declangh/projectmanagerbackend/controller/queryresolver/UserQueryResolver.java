@@ -1,5 +1,6 @@
 package io.github.declangh.projectmanagerbackend.controller.queryresolver;
 
+import io.github.declangh.projectmanagerbackend.model.dto.ProjectMember;
 import io.github.declangh.projectmanagerbackend.model.entity.User;
 import io.github.declangh.projectmanagerbackend.service.UserService;
 import lombok.NonNull;
@@ -18,6 +19,13 @@ public class UserQueryResolver {
 
     @QueryMapping
     public User getUserByEmail(@Argument @NonNull String email) {
-        return userService.getUser(email);
+        return userService.getUserByEmail(email);
+    }
+
+    @QueryMapping
+    public ProjectMember getUserDetails(@Argument @NonNull String userEmail,
+                                        @Argument @NonNull Long projectId,
+                                        @Argument          Long groupId) {
+        return userService.getUserDetails(userEmail, projectId, groupId);
     }
 }

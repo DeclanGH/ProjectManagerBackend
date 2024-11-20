@@ -13,6 +13,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -33,6 +34,7 @@ public class Sprint {
 
     private LocalDate endDate;
 
+    @Setter
     private boolean isOpen;
 
     private boolean isDue;
@@ -64,7 +66,7 @@ public class Sprint {
 
     @PrePersist
     @PreUpdate
-    private void updateIsDue() {
+    public void updateIsDue() {
         this.isDue = this.isOpen && this.endDate != null && this.endDate.isBefore(LocalDate.now());
     }
 

@@ -2,14 +2,18 @@
 type Query {
     # user
     getUserByEmail(email: String!): User!
+    getUserDetails(userEmail: String!, projectId: ID!, groupId: ID): ProjectMember!
 
     # project
     getUserProjects(userEmail: String!): [Project!]!
     getProjectPage(projectId: ID!, userEmail: String!): ProjectPage!
     getProjectInviteLinkPath(projectId: ID!, userEmail: String!): String!
+    getProjectBurndownChartData(userEmail: String!, projectId: ID!): BurndownChartDataDto!
 
     # group
     getGroupMembers(userEmail: String!, projectId: ID!, groupId: ID!): [ProjectMember!]!
+    getGroupBurndownChartData(userEmail: String!, projectId: ID!, groupId: ID!): BurndownChartDataDto!
+    getNotCompletedAssignedBacklogs(userEmail: String!, projectId: ID!, groupId: ID!): [BacklogEntityDto!]!
 
     # backlog
     getGroupBacklog(userEmail: String!, projectId: ID!, groupId: ID!, backlogId: ID!): BacklogEntityDto!
@@ -30,18 +34,20 @@ type Mutation {
     createSprint(userEmail: String!, projectId: ID!, groupId: ID!, sprintName: String!, startDate: String!, endDate: String!): SprintEntityDto!
 
     # update
+    addMemberToGroup(userEmail: String!, projectId: ID!, groupId: ID!, newGroupMember: String!): ProjectMember!
     addMemberToProjectUsingInvite(userEmail: String!, projectId: ID!, token: String!): Project
     removeMemberFromProject(projectId: ID!, deleterEmail: String!, memberToDeleteEmail: String!): Boolean
     updateBacklog(userEmail: String!, projectId: ID!, groupId: ID!, backlogId: ID!, assigneeEmail: String, sprintId: ID, backlogState: BacklogState): BacklogEntityDto
     updateBacklogState(userEmail: String!,projectId: ID!, groupId: ID!, sprintId: ID!, backlogId: ID!, backlogState: BacklogState!): SprintEntityDto!
+    closeSprint(userEmail: String!, projectId: ID!, groupId: ID!, sprintId: ID!): SprintEntityDto!
 
     # delete
-    deleteUser(email: String!): Boolean
+    #deleteUser(email: String!): Boolean
     deleteProject(projectId: ID!, email: String!): Boolean
     deleteGroup(email: String!, groupId: ID!, projectId: ID!): Boolean
 }
 
 # publish updates
 type Subscription {
-    backlogStateChangedInSprint: SprintEntityDto
+    backlogStateChangedInSprint(sprintId: ID!): SprintEntityDto
 }

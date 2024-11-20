@@ -1,7 +1,7 @@
 package io.github.declangh.projectmanagerbackend.model.entity;
 
-import io.github.declangh.projectmanagerbackend.model.enumeration.BacklogState;
 import io.github.declangh.projectmanagerbackend.common.constant.namingsystem.table.TableName;
+import io.github.declangh.projectmanagerbackend.model.enumeration.BacklogState;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,8 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PostPersist;
-import jakarta.persistence.PostUpdate;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -47,7 +45,6 @@ public class Backlog {
 
     private Boolean isModifiable;
 
-    @Setter
     private BacklogState state;
 
     @ManyToOne
@@ -93,12 +90,28 @@ public class Backlog {
      */
     @PrePersist
     @PreUpdate
-    public void updateModifiableState() {
+    protected void updateModifiableState() {
         if (this.sprint == null) {
             this.isModifiable = this.state != BacklogState.COMPLETED;
         } else {
             this.isModifiable = this.sprint.isOpen() || this.state != BacklogState.COMPLETED;
         }
+    }
+
+    public void setState(@NonNull final User setter, @NonNull final BacklogState backlogState) {
+        this.state = backlogState;
+
+        if (backlogState == BacklogState.COMPLETED) {
+            this.dateCompleted = LocalDateTime.now();
+            if (this.assignee == null) {
+                this.assignee = setter;
+                this.assigner = setter;
+            }
+        } else {
+            this.dateCompleted = null;
+        }
+
+        this.updateModifiableState();
     }
 
     public void setSprint(@NonNull final Sprint sprint) {
@@ -108,10 +121,6 @@ public class Backlog {
         this.sprint = sprint;
         this.sprint.getBacklogs().add(this);
     }
-
-    // backlog a -> sprint a
-    // sprint a -> backlog a, b, c
-    // sprint b ->
 
     public void removeSprint() {
         this.sprint = null;

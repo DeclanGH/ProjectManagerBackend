@@ -24,6 +24,7 @@ public class UserMutationResolver {
         return userService.createOrUpdateUser(email, firstName, middleName, lastName);
     }
 
+    @Deprecated // same idea, i want to deactivate accounts, not delete them
     @MutationMapping
     public Boolean deleteUser(@Argument @NonNull final String email) {
         return userService.deleteUser(email);

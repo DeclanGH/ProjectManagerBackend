@@ -4,7 +4,6 @@ import io.github.declangh.projectmanagerbackend.component.SprintEntityDtoPublish
 import io.github.declangh.projectmanagerbackend.model.dto.SprintEntityDto;
 import io.github.declangh.projectmanagerbackend.model.enumeration.BacklogState;
 import io.github.declangh.projectmanagerbackend.service.SprintService;
-import io.github.declangh.projectmanagerbackend.service.UserService;
 import lombok.NonNull;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -38,7 +37,18 @@ public class SprintMutationResolver {
                                               @Argument @NonNull final Long sprintId,
                                               @Argument @NonNull final Long backlogId,
                                               @Argument @NonNull final BacklogState backlogState) {
-        SprintEntityDto sprintEntityDto = sprintService.updateBacklogState(userEmail, projectId, groupId, sprintId, backlogId, backlogState);
+        SprintEntityDto sprintEntityDto = sprintService.updateBacklogState(
+                userEmail, projectId, groupId, sprintId, backlogId, backlogState);
+        sprintEntityDtoPublisher.publish(sprintEntityDto);
+        return sprintEntityDto;
+    }
+
+    @MutationMapping
+    public SprintEntityDto closeSprint(@Argument @NonNull final String userEmail,
+                                       @Argument @NonNull final Long projectId,
+                                       @Argument @NonNull final Long groupId,
+                                       @Argument @NonNull final Long sprintId) {
+        SprintEntityDto sprintEntityDto = sprintService.closeSprint(userEmail, projectId, groupId, sprintId);
         sprintEntityDtoPublisher.publish(sprintEntityDto);
         return sprintEntityDto;
     }

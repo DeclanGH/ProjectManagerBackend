@@ -20,6 +20,8 @@ type ProjectMember {
     lastName: String!
     isCreator: Boolean!
     isOwner: Boolean!
+    isGroupCreator: Boolean
+    isGroupMember: Boolean
 }
 
 type ProjectPage {
@@ -76,3 +78,9 @@ type SprintEntityDto {
     backlogs: [BacklogEntityDto]
 }
 
+type BurndownChartDataDto {
+    title: String,
+    labels: [String!]!
+    effortPointsRemaining: [Int!]!
+    idealEffortPointsRemaining: [Float!]!
+}

@@ -3,6 +3,7 @@ package io.github.declangh.projectmanagerbackend.service;
 import io.github.declangh.projectmanagerbackend.common.builder.DtoBuilder;
 import io.github.declangh.projectmanagerbackend.common.constant.statuscodes.ProjectMangerStatusCode;
 import io.github.declangh.projectmanagerbackend.common.exception.ProjectManagerException;
+import io.github.declangh.projectmanagerbackend.common.helper.EntityRetriever;
 import io.github.declangh.projectmanagerbackend.model.dto.SprintEntityDto;
 import io.github.declangh.projectmanagerbackend.model.entity.Backlog;
 import io.github.declangh.projectmanagerbackend.model.entity.Group;
@@ -54,9 +55,9 @@ public class SprintService {
                                         @NonNull String sprintName,
                                         @NonNull String startDate,
                                         @NonNull String endDate) {
-        User requester = getUser(userEmail);
-        Project project = getProject(projectId);
-        Group group = getGroup(groupId);
+        User requester = EntityRetriever.getById(userRepository, userEmail);
+        Project project = EntityRetriever.getById(projectRepository, projectId);
+        Group group = EntityRetriever.getById(groupRepository, groupId);
 
         if (!project.getMembers().contains(requester)) {
             throw new ProjectManagerException(ProjectMangerStatusCode.FORBIDDEN);
@@ -68,7 +69,7 @@ public class SprintService {
         Sprint sprint = new Sprint(sprintName, startDateAsLocalDate, endDateAsLocalDate, group);
         sprintRepository.save(sprint);
 
-        return DtoBuilder.buildSprintEntityDto(sprint, project);
+        return DtoBuilder.buildSprintEntityDto(sprint, project, group);
     }
 
     @Transactional
@@ -76,25 +77,27 @@ public class SprintService {
                                           @NonNull final Long projectId,
                                           @NonNull final Long groupId,
                                           @NonNull final Long sprintId) {
-        User requester = getUser(userEmail);
-        Project project = getProject(projectId);
-        getGroup(groupId);
-        Sprint sprint = getSprint(sprintId);
+        User requester = EntityRetriever.getById(userRepository, userEmail);
+        Project project = EntityRetriever.getById(projectRepository, projectId);
+        Group group = EntityRetriever.getById(groupRepository, groupId);
+        Sprint sprint = EntityRetriever.getById(sprintRepository, sprintId);
+
+        sprintRepository.save(sprint);
 
         if (!project.getMembers().contains(requester)) {
             throw new ProjectManagerException(ProjectMangerStatusCode.FORBIDDEN);
         }
 
-        return DtoBuilder.buildSprintEntityDto(sprint, project);
+        return DtoBuilder.buildSprintEntityDto(sprint, project, group);
     }
 
     @Transactional
     public List<SprintEntityDto> getGroupSprints(@NonNull final String userEmail,
                                                  @NonNull final Long projectId,
                                                  @NonNull final Long groupId) {
-        User requester = getUser(userEmail);
-        Project project = getProject(projectId);
-        getGroup(groupId);
+        User requester = EntityRetriever.getById(userRepository, userEmail);
+        Project project = EntityRetriever.getById(projectRepository, projectId);
+        Group group = EntityRetriever.getById(groupRepository, groupId);
 
         if (!project.getMembers().contains(requester)) {
             throw new ProjectManagerException(ProjectMangerStatusCode.FORBIDDEN);
@@ -104,7 +107,8 @@ public class SprintService {
         List<SprintEntityDto> sprintEntityDtoList = new ArrayList<>();
 
         for (Sprint sprint : groupSprints) {
-            sprintEntityDtoList.add(DtoBuilder.buildSprintEntityDto(sprint, project));
+            sprint.updateIsDue();
+            sprintEntityDtoList.add(DtoBuilder.buildSprintEntityDto(sprint, project, group));
         }
 
         return sprintEntityDtoList;
@@ -117,44 +121,38 @@ public class SprintService {
                                               @NonNull final Long sprintId,
                                               @NonNull final Long backlogId,
                                               @NonNull final BacklogState backlogState){
-        User backlogStateUpdater = getUser(userEmail);
-        Project project = getProject(projectId);
-        Group group = getGroup(groupId);
-        Sprint sprint = getSprint(sprintId);
-        Backlog backlog = getBacklog(backlogId);
+        User backlogStateUpdater = EntityRetriever.getById(userRepository, userEmail);
+        Project project = EntityRetriever.getById(projectRepository, projectId);
+        Group group = EntityRetriever.getById(groupRepository, groupId);
+        Sprint sprint = EntityRetriever.getById(sprintRepository, sprintId);
+        Backlog backlog = EntityRetriever.getById(backlogRepository, backlogId);
 
         if (group.getMembers().contains(backlogStateUpdater) && backlog.getIsModifiable()) {
-            backlog.setState(backlogState);
-            backlog.updateModifiableState();
+            backlog.setState(backlogStateUpdater, backlogState);
+            backlogRepository.save(backlog);
+            sprintRepository.save(sprint);
+            return DtoBuilder.buildSprintEntityDto(sprint, project, group);
         } else {
             throw new ProjectManagerException(ProjectMangerStatusCode.FORBIDDEN);
         }
-        backlogRepository.save(backlog);
-        return DtoBuilder.buildSprintEntityDto(sprint, project);
     }
 
-    private User getUser(final String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ProjectManagerException(ProjectMangerStatusCode.NOT_FOUND));
-    }
+    @Transactional
+    public SprintEntityDto closeSprint(@NonNull final String userEmail,
+                                       @NonNull final Long projectId,
+                                       @NonNull final Long groupId,
+                                       @NonNull final Long sprintId) {
+        User user = EntityRetriever.getById(userRepository, userEmail);
+        Project project = EntityRetriever.getById(projectRepository, projectId);
+        Group group = EntityRetriever.getById(groupRepository, groupId);
+        Sprint sprint = EntityRetriever.getById(sprintRepository, sprintId);
 
-    private Project getProject(final Long projectId) {
-        return projectRepository.findById(projectId)
-                .orElseThrow(() -> new ProjectManagerException(ProjectMangerStatusCode.NOT_FOUND));
-    }
-
-    private Group getGroup(final Long groupId) {
-        return groupRepository.findById(groupId)
-                .orElseThrow(() -> new ProjectManagerException(ProjectMangerStatusCode.NOT_FOUND));
-    }
-
-    private Sprint getSprint(final Long sprintId) {
-        return sprintRepository.findById(sprintId)
-                .orElseThrow(() -> new ProjectManagerException(ProjectMangerStatusCode.NOT_FOUND));
-    }
-
-    private Backlog getBacklog(final Long backlogId) {
-        return backlogRepository.findById(backlogId)
-                .orElseThrow(() -> new ProjectManagerException(ProjectMangerStatusCode.NOT_FOUND));
+        if (group.getMembers().contains(user)) {
+            sprint.setOpen(false);
+            sprintRepository.save(sprint);
+            return DtoBuilder.buildSprintEntityDto(sprint, project, group);
+        } else {
+            throw new ProjectManagerException(ProjectMangerStatusCode.FORBIDDEN);
+        }
     }
 }

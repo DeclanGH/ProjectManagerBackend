@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,7 +36,6 @@ public class Group {
 
     private LocalDateTime dateCreated;
 
-    @Setter
     private Integer duration;
 
     @ManyToOne
@@ -68,6 +68,10 @@ public class Group {
         this.members = new HashSet<>();
         this.backlogs = new HashSet<>();
         this.sprints = new HashSet<>();
+
+        long daysBetweenProjectAndGroup = Duration.between(project.getDateCreated(), this.dateCreated).toDays();
+        Integer weeksBetweenProjectAndGroup = (int) (daysBetweenProjectAndGroup / 7);
+        this.duration = project.getDuration() - weeksBetweenProjectAndGroup; //remainingWeeksTillProjectEnd
     }
 
     public void addToMemberSet(User user) {

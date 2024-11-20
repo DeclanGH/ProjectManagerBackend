@@ -16,6 +16,10 @@ spring:
     path: /graphql
     websocket:
       path: /graphql
+      keep-alive: 10
+    graphiql:
+      enabled: true
+      path: /gql
 
   jpa:
     hibernate:
