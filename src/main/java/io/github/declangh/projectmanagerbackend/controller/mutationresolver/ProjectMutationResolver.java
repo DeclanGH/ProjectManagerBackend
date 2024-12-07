@@ -1,5 +1,6 @@
 package io.github.declangh.projectmanagerbackend.controller.mutationresolver;
 
+import io.github.declangh.projectmanagerbackend.model.dto.ProjectMember;
 import io.github.declangh.projectmanagerbackend.model.entity.Project;
 import io.github.declangh.projectmanagerbackend.service.ProjectService;
 import lombok.NonNull;
@@ -35,6 +36,20 @@ public class ProjectMutationResolver {
                                                  @Argument @NonNull final String userEmail,
                                                  @Argument @NonNull final String token) {
         return projectService.addUserUsingInvite(projectId, userEmail, token);
+    }
+
+    @MutationMapping
+    public ProjectMember promoteMemberToOwner(@Argument @NonNull final String userEmail,
+                                              @Argument @NonNull final String memberEmail,
+                                              @Argument @NonNull final Long projectId) {
+        return projectService.promoteMemberToOwner(userEmail, memberEmail, projectId);
+    }
+
+    @MutationMapping
+    public ProjectMember demoteOwnerToMember(@Argument @NonNull final String userEmail,
+                                             @Argument @NonNull final String memberEmail,
+                                             @Argument @NonNull final Long projectId) {
+        return projectService.demoteOwnerToMember(userEmail, memberEmail, projectId);
     }
 
     @MutationMapping

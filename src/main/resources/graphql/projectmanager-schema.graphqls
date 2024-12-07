@@ -9,6 +9,7 @@ type Query {
     getProjectPage(projectId: ID!, userEmail: String!): ProjectPage!
     getProjectInviteLinkPath(projectId: ID!, userEmail: String!): String!
     getProjectBurndownChartData(userEmail: String!, projectId: ID!): BurndownChartDataDto!
+    getProjectMember(userEmail: String!, projectId: ID!, groupId: ID): ProjectMember!
 
     # group
     getGroupMembers(userEmail: String!, projectId: ID!, groupId: ID!): [ProjectMember!]!
@@ -40,11 +41,14 @@ type Mutation {
     updateBacklog(userEmail: String!, projectId: ID!, groupId: ID!, backlogId: ID!, assigneeEmail: String, sprintId: ID, backlogState: BacklogState): BacklogEntityDto
     updateBacklogState(userEmail: String!,projectId: ID!, groupId: ID!, sprintId: ID!, backlogId: ID!, backlogState: BacklogState!): SprintEntityDto!
     closeSprint(userEmail: String!, projectId: ID!, groupId: ID!, sprintId: ID!): SprintEntityDto!
+    promoteMemberToOwner(userEmail: String!, memberEmail: String!, projectId: ID!): ProjectMember!
+    demoteOwnerToMember(userEmail: String!, memberEmail: String!, projectId: ID!): ProjectMember!
 
     # delete
     #deleteUser(email: String!): Boolean
     deleteProject(projectId: ID!, email: String!): Boolean
     deleteGroup(email: String!, groupId: ID!, projectId: ID!): Boolean
+    deleteBacklog(userEmail: String!, projectId: ID!, groupId: ID!, backlogId: ID!): Boolean
 }
 
 # publish updates

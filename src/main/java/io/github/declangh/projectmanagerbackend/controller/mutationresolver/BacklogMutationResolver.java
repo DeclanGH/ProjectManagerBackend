@@ -37,4 +37,12 @@ public class BacklogMutationResolver {
                                           @Argument final BacklogState backlogState){
         return backlogService.updateBacklog(userEmail, projectId, groupId, backlogId, assigneeEmail, sprintId, backlogState);
     }
+
+    @MutationMapping
+    public Boolean deleteBacklog(@Argument @NonNull final String userEmail,
+                                 @Argument @NonNull final Long projectId,
+                                 @Argument @NonNull final Long groupId,
+                                 @Argument @NonNull final Long backlogId) {
+        return backlogService.deleteBacklog(userEmail, projectId, groupId, backlogId);
+    }
 }

@@ -59,7 +59,7 @@ public class SprintService {
         Project project = EntityRetriever.getById(projectRepository, projectId);
         Group group = EntityRetriever.getById(groupRepository, groupId);
 
-        if (!project.getMembers().contains(requester)) {
+        if (!group.getMembers().contains(requester)) {
             throw new ProjectManagerException(ProjectMangerStatusCode.FORBIDDEN);
         }
 

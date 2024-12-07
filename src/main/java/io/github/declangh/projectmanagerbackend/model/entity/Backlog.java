@@ -116,18 +116,13 @@ public class Backlog {
 
     public void setSprint(@NonNull final Sprint sprint) {
         if (this.sprint != null) {
-            this.sprint.dissociateBacklogs();
+            this.sprint.removeBacklog(this);
         }
         this.sprint = sprint;
         this.sprint.getBacklogs().add(this);
     }
 
-    public void removeSprint() {
-        this.sprint = null;
-    }
-
-    public void dissociateSprint() {
-        this.sprint.getBacklogs().remove(this);
+    protected void removeSprint() {
         this.sprint = null;
     }
 }

@@ -1,5 +1,6 @@
 package io.github.declangh.projectmanagerbackend.service;
 
+import io.github.declangh.projectmanagerbackend.common.builder.DtoBuilder;
 import io.github.declangh.projectmanagerbackend.common.constant.statuscodes.ProjectMangerStatusCode;
 import io.github.declangh.projectmanagerbackend.common.exception.ProjectManagerException;
 import io.github.declangh.projectmanagerbackend.common.helper.EntityRetriever;
@@ -11,6 +12,7 @@ import io.github.declangh.projectmanagerbackend.model.entity.Group;
 import io.github.declangh.projectmanagerbackend.model.entity.Project;
 import io.github.declangh.projectmanagerbackend.model.entity.User;
 import io.github.declangh.projectmanagerbackend.repository.BacklogRepository;
+import io.github.declangh.projectmanagerbackend.repository.GroupRepository;
 import io.github.declangh.projectmanagerbackend.repository.ProjectRepository;
 import io.github.declangh.projectmanagerbackend.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -35,13 +37,15 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final BacklogRepository backlogRepository;
+    private final GroupRepository groupRepository;
 
     public ProjectService(ProjectRepository projectRepository,
                           UserRepository userRepository,
-                          BacklogRepository backlogRepository) {
+                          BacklogRepository backlogRepository, GroupRepository groupRepository) {
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
         this.backlogRepository = backlogRepository;
+        this.groupRepository = groupRepository;
     }
 
     @Transactional
@@ -148,7 +152,7 @@ public class ProjectService {
         User newMember = EntityRetriever.getById(userRepository, newMemberEmail);
         Project project = EntityRetriever.getById(projectRepository, projectId);
 
-        if (!project.getCreatorEmail().equals(adderEmail) || !project.getOwners().contains(adder)) {
+        if (!project.getCreatorEmail().equals(adderEmail) && !project.getOwners().contains(adder)) {
             throw new ProjectManagerException(ProjectMangerStatusCode.FORBIDDEN);
         }
 
@@ -163,7 +167,7 @@ public class ProjectService {
         User user = EntityRetriever.getById(userRepository, userEmail);
         Project project = EntityRetriever.getById(projectRepository, projectId);
 
-        if (!project.getCreatorEmail().equals(userEmail) || !project.getOwners().contains(user)) {
+        if (!project.getCreatorEmail().equals(userEmail) && !project.getOwners().contains(user)) {
             throw new ProjectManagerException(ProjectMangerStatusCode.FORBIDDEN);
         }
 
@@ -174,7 +178,7 @@ public class ProjectService {
         project.setInviteTokenExpirationDate(expirationDate);
         projectRepository.save(project);
 
-
+        // allows prepending multiple host urls without modifying this line (E.g. dev and prod hosts)
         return "/" + projectId + "?token=" + token;
     }
 
@@ -257,6 +261,57 @@ public class ProjectService {
         } else {
             throw new ProjectManagerException(ProjectMangerStatusCode.BAD_REQUEST);
         }
+    }
+
+    @Transactional
+    public ProjectMember getProjectMember(@NonNull final String userEmail,
+                                          @NonNull final Long projectId,
+                                          final Long groupId) {
+        User member = EntityRetriever.getById(userRepository, userEmail);
+        Project project = EntityRetriever.getById(projectRepository, projectId);
+        Group group = (groupId != null) ? EntityRetriever.getById(groupRepository, groupId) : null;
+
+        if (!project.getMembers().contains(member)) {
+            throw new ProjectManagerException(ProjectMangerStatusCode.FORBIDDEN);
+        }
+
+        return DtoBuilder.buildProjectMember(project, member, group);
+    }
+
+    @Transactional
+    public ProjectMember promoteMemberToOwner(@NonNull final String userEmail,
+                                              @NonNull final String memberEmail,
+                                              @NonNull final Long projectId) {
+        User promoter = EntityRetriever.getById(userRepository, userEmail);
+        User memberToBePromoted = EntityRetriever.getById(userRepository, memberEmail);
+        Project project = EntityRetriever.getById(projectRepository, projectId);
+
+        if (!project.getCreatorEmail().equals(promoter.getEmail())) {
+            throw new ProjectManagerException(ProjectMangerStatusCode.FORBIDDEN);
+        }
+
+        project.addToOwnerSet(memberToBePromoted);
+        projectRepository.save(project);
+
+        return DtoBuilder.buildProjectMember(project, memberToBePromoted, null);
+    }
+
+    @Transactional
+    public ProjectMember demoteOwnerToMember(@NonNull final String userEmail,
+                                             @NonNull final String memberEmail,
+                                             @NonNull final Long projectId) {
+        User promoter = EntityRetriever.getById(userRepository, userEmail);
+        User memberToBeDemoted = EntityRetriever.getById(userRepository, memberEmail);
+        Project project = EntityRetriever.getById(projectRepository, projectId);
+
+        if (!project.getCreatorEmail().equals(promoter.getEmail())) {
+            throw new ProjectManagerException(ProjectMangerStatusCode.FORBIDDEN);
+        }
+
+        project.removeFromOwnerSet(memberToBeDemoted);
+        projectRepository.save(project);
+
+        return DtoBuilder.buildProjectMember(project, memberToBeDemoted, null);
     }
 
     @Transactional

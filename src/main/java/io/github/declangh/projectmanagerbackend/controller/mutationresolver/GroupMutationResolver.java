@@ -28,7 +28,7 @@ public class GroupMutationResolver {
     public Boolean deleteGroup(@Argument @NonNull final String email,
                                @Argument @NonNull final Long groupId,
                                @Argument @NonNull final Long projectId) {
-        return groupService.deleteGroup(email, groupId, projectId);
+        return groupService.deleteGroup(email, projectId, groupId);
     }
 
     @MutationMapping

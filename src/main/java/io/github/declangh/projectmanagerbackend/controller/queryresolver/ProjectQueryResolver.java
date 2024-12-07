@@ -1,6 +1,7 @@
 package io.github.declangh.projectmanagerbackend.controller.queryresolver;
 
 import io.github.declangh.projectmanagerbackend.model.dto.BurndownChartDataDto;
+import io.github.declangh.projectmanagerbackend.model.dto.ProjectMember;
 import io.github.declangh.projectmanagerbackend.model.dto.ProjectPage;
 import io.github.declangh.projectmanagerbackend.model.entity.Project;
 import io.github.declangh.projectmanagerbackend.service.ProjectService;
@@ -41,5 +42,12 @@ public class ProjectQueryResolver {
     public BurndownChartDataDto getProjectBurndownChartData(@Argument @NonNull final String userEmail,
                                                             @Argument @NonNull final Long projectId) {
         return projectService.getProjectBurndownChartData(userEmail, projectId);
+    }
+
+    @QueryMapping
+    public ProjectMember getProjectMember(@Argument @NonNull final String userEmail,
+                                          @Argument @NonNull final Long projectId,
+                                          @Argument final Long groupId) {
+        return projectService.getProjectMember(userEmail, projectId, groupId);
     }
 }

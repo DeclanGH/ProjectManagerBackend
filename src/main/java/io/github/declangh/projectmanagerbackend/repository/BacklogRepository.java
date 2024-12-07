@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Repository
 public interface BacklogRepository extends JpaRepository<Backlog, Long> {
-    List<Backlog> findByGroupId(Long groupId);
+    List<Backlog> findByGroupIdOrderByDateCreatedDesc(Long groupId);
 
     @Query("SELECT SUM(b.effort) FROM Backlog b " +
             "WHERE b.group.id IN :groupIds " +

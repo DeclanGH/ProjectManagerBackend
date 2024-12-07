@@ -87,10 +87,6 @@ public class Project {
         user.getProjects().add(this);
     }
 
-    public void addToGroupSet(@NonNull final Group group) {
-        this.getGroups().add(group);
-    }
-
     public void removeMemberFromProject(@NonNull final User user) {
         this.removeFromOwnerSet(user);
         this.removeFromMemberSet(user);

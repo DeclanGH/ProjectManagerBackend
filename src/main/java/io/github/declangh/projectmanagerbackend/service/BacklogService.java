@@ -58,7 +58,7 @@ public class BacklogService {
         Project project = EntityRetriever.getById(projectRepository, projectId);
         Group group = EntityRetriever.getById(groupRepository, groupId);
 
-        if (!project.getCreatorEmail().equals(userEmail) || !project.getOwners().contains(creator) ||
+        if (!project.getCreatorEmail().equals(userEmail) && !project.getOwners().contains(creator) &&
                 !group.getMembers().contains(creator)) {
             throw new ProjectManagerException(ProjectMangerStatusCode.FORBIDDEN);
         }
@@ -138,7 +138,8 @@ public class BacklogService {
             throw new ProjectManagerException(ProjectMangerStatusCode.FORBIDDEN);
         }
 
-        List<Backlog> backlogs = backlogRepository.findByGroupId(groupId);
+        // NTS: Add pagination if you're going to be doing this sorting - O(n) vs O(1) #TODO
+        List<Backlog> backlogs = backlogRepository.findByGroupIdOrderByDateCreatedDesc(groupId);
         List<BacklogEntityDto> groupBacklogs = new ArrayList<>();
 
         for (Backlog backlog : backlogs) {
@@ -146,5 +147,28 @@ public class BacklogService {
         }
 
         return groupBacklogs;
+    }
+
+    @Transactional
+    public Boolean deleteBacklog(@NonNull final String userEmail,
+                                 @NonNull final Long projectId,
+                                 @NonNull final Long groupId,
+                                 @NonNull final Long backlogId) {
+        User deleter = EntityRetriever.getById(userRepository, userEmail);
+        Project project = EntityRetriever.getById(projectRepository, projectId);
+        Group group = EntityRetriever.getById(groupRepository, groupId);
+        Backlog backlog = EntityRetriever.getById(backlogRepository, backlogId);
+
+        if ((!project.getMembers().contains(deleter) && !group.getMembers().contains(deleter)) ||
+                !group.getBacklogs().contains(backlog)) {
+            throw new ProjectManagerException(ProjectMangerStatusCode.FORBIDDEN);
+        }
+
+        if (backlog.getIsModifiable()) {
+            backlogRepository.deleteById(backlogId);
+            return true;
+        } else {
+            return false;
+        }
     }
 }

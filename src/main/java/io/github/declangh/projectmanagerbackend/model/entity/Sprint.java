@@ -70,15 +70,8 @@ public class Sprint {
         this.isDue = this.isOpen && this.endDate != null && this.endDate.isBefore(LocalDate.now());
     }
 
-    public void removeBacklog(@NonNull final Backlog backlog) {
+    protected void removeBacklog(@NonNull final Backlog backlog) {
         backlog.removeSprint();
         this.backlogs.remove(backlog);
-    }
-
-    public void dissociateBacklogs() {
-        for (Backlog backlog : this.backlogs) {
-            backlog.removeSprint();
-        }
-        this.backlogs.clear();
     }
 }

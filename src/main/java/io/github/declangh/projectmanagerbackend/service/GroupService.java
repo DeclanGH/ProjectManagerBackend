@@ -73,8 +73,8 @@ public class GroupService {
         Group group = EntityRetriever.getById(groupRepository, groupId);
         User newMember = EntityRetriever.getById(userRepository, newGroupMember);
 
-        if (!group.getCreatorEmail().equals(adder.getEmail()) || !project.getCreatorEmail().equals(adder.getEmail())
-                || !project.getOwners().contains(adder)) {
+        if (!group.getCreatorEmail().equals(adder.getEmail()) && !project.getCreatorEmail().equals(adder.getEmail())
+                && !project.getOwners().contains(adder)) {
             throw new ProjectManagerException(ProjectMangerStatusCode.FORBIDDEN);
         }
 
@@ -90,7 +90,7 @@ public class GroupService {
     public BurndownChartDataDto getGroupBurndownChartData(@NonNull final String userEmail,
                                                           @NonNull final Long projectId,
                                                           @NonNull final Long groupId) {
-        User requester =EntityRetriever.getById(userRepository, userEmail);
+        User requester = EntityRetriever.getById(userRepository, userEmail);
         Project project = EntityRetriever.getById(projectRepository, projectId);
         Group group = EntityRetriever.getById(groupRepository, groupId);
 

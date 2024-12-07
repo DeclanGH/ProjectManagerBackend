@@ -10,7 +10,7 @@ VOLUME /tmp
 COPY target/ProjectManagerBackend-0.0.1-SNAPSHOT.jar projectmanagerbackendprod.jar
 
 # Expose
-EXPOSE 40000
+EXPOSE 8080
 
 # Run
 ENTRYPOINT ["java", "-jar", "projectmanagerbackendprod.jar"]

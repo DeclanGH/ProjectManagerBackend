@@ -14,7 +14,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -80,19 +79,5 @@ public class Group {
 
     public void removeFromMemberSet(User user) {
         this.members.remove(user);
-    }
-
-    public boolean addToBacklogSet(Backlog backlog) {
-        return this.backlogs.add(backlog);
-    }
-
-    public void addToSprintSet(Sprint sprint) {}
-
-    protected void dissociateSprint(Sprint sprint) {
-        this.sprints.removeIf(s -> s.equals(sprint));
-    }
-
-    protected void dissociateBacklog(Backlog backlog) {
-        this.backlogs.removeIf(b -> b.equals(backlog));
     }
 }
